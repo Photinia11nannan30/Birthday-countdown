@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>倒數</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    display: flex; flex-direction: column;
+    justify-content: center; align-items: center;
+    min-height: 100vh; padding: 2em;
+    background: #1a1a1a; color: #f0e6d3;
+    font-family: Georgia, 'Noto Serif TC', serif;
+  }
+  .title { font-size: 1.4em; opacity: 0.6; margin-bottom: 0.5em; }
+  .target-date { font-size: 0.9em; opacity: 0.4; margin-bottom: 2em; }
+  .main-countdown {
+    font-size: 2.2em; letter-spacing: 0.04em;
+    margin-bottom: 2em; text-align: center;
+    line-height: 1.4;
+  }
+  .breakdown { width: 100%; max-width: 400px; }
+  .row {
+    display: flex; justify-content: space-between;
+    padding: 0.6em 0;
+    border-bottom: 1px solid rgba(240,230,211,0.08);
+    font-size: 1.1em;
+  }
+  .row .label { opacity: 0.5; }
+  .row .value { font-variant-numeric: tabular-nums; }
+</style>
+</head>
+<body>
+<div class="title">距離成年</div>
+<div class="target-date">2026年7月8日 10:46 CST</div>
+<div class="main-countdown" id="main"></div>
+<div class="breakdown">
+  <div class="row"><span class="label">月</span><span class="value" id="months"></span></div>
+  <div class="row"><span class="label">週</span><span class="value" id="weeks"></span></div>
+  <div class="row"><span class="label">天</span><span class="value" id="days"></span></div>
+  <div class="row"><span class="label">小時</span><span class="value" id="hours"></span></div>
+  <div class="row"><span class="label">分鐘</span><span class="value" id="minutes"></span></div>
+  <div class="row"><span class="label">秒</span><span class="value" id="seconds"></span></div>
+</div>
+<script>
+const target = new Date('2026-07-08T10:46:00+08:00');
+
+function getMonthsDiff(now, target) {
+  let months = (target.getFullYear() - now.getFullYear()) * 12 
+               + (target.getMonth() - now.getMonth());
+  const nowDay = now.getDate() + (now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds()) / 86400;
+  const targetDay = target.getDate() + (target.getHours() * 3600 + target.getMinutes() * 60 + target.getSeconds()) / 86400;
+  if (nowDay > targetDay) months--;
+  return Math.max(0, months);
+}
+
+function fmt(n) {
+  return n.toLocaleString('en-US');
+}
+
+function update() {
+  const now = new Date();
+  const diff = target - now;
+  if (diff <= 0) {
+    document.getElementById('main').textContent = '🎂 已成年';
+    ['months','weeks','days','hours','minutes','seconds'].forEach(id => {
+      document.getElementById(id).textContent = '0';
+    });
+    return;
+  }
+
+  const totalSec = Math.floor(diff / 1000);
+  const d = Math.floor(totalSec / 86400);
+  const h = Math.floor((totalSec % 86400) / 3600);
+  const m = Math.floor((totalSec % 3600) / 60);
+  const s = totalSec % 60;
+
+  document.getElementById('main').textContent = `${d}天 ${h}時 ${m}分 ${s}秒`;
+
+  document.getElementById('months').textContent = `≈ ${fmt(getMonthsDiff(now, target))} 個月`;
+  document.getElementById('weeks').textContent = `${fmt(Math.floor(totalSec / 604800))} 週`;
+  document.getElementById('days').textContent = `${fmt(d)} 天`;
+  document.getElementById('hours').textContent = `${fmt(Math.floor(totalSec / 3600))} 小時`;
+  document.getElementById('minutes').textContent = `${fmt(Math.floor(totalSec / 60))} 分鐘`;
+  document.getElementById('seconds').textContent = `${fmt(totalSec)} 秒`;
+}
+
+update();
+setInterval(update, 1000);
+</script>
+</body>
+</html>
